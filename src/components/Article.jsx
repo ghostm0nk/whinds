@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Edit, MessageCircle, User, Calendar, MapPin, Wind } from 'lucide-react'
+import { Edit, MessageCircle, User, Calendar, MapPin, Wind, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 export default function Article({ article, session, onNavigate }) {
@@ -49,6 +49,23 @@ export default function Article({ article, session, onNavigate }) {
     }
   }
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this article?')) return
+
+    try {
+      const { error } = await supabase
+        .from('articles')
+        .delete()
+        .eq('id', article.id)
+
+      if (error) throw error
+      onNavigate('home')
+    } catch (error) {
+      console.error('Error deleting article:', error)
+      alert('Error deleting article')
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <article className="bg-white rounded-lg shadow-md p-8 mb-8">
@@ -73,13 +90,22 @@ export default function Article({ article, session, onNavigate }) {
           </div>
           
           {session && session.user.id === article.user_id && (
-            <button
-              onClick={() => onNavigate('editor', article)}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              <Edit className="h-4 w-4" />
-              <span>Edit Article</span>
-            </button>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => onNavigate('editor', article)}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                <Edit className="h-4 w-4" />
+                <span>Edit Article</span>
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Delete Article</span>
+              </button>
+            </div>
           )}
         </div>
 
